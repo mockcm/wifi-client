@@ -49,7 +49,7 @@
             <configuration>  
                 <archive>  
                     <manifest> 
-                    	<mainClass>com.mock.wifiserver.WifiServer</mainClass>
+                    	<mainClass>com.mock.wificlient.WifiClient</mainClass>
                     </manifest>  
                 </archive>  
                 <descriptorRefs>  
