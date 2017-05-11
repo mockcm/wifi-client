@@ -51,38 +51,37 @@ public class WifiClient {
 		
 		ByteBuf data = ByteBufAllocator.DEFAULT.buffer();
 
-		//写长度，（1控制头 + 19数据）
+		//写长度，（1控制头(D0) + 19数据  = 20）
 		data.writeShort(20);
 				
 		//状态数据(控制头)
 		data.writeByte(0x06);
 		
-		//D1-D2
+		//D1-D2精油余量
 		data.writeShort(96);
 		
-		//D3-D4
+		//D3-D4精油总量
 		data.writeShort(102);
 		
-		//D5
+		//D5电量
 		data.writeByte(56);
 		
-		//D6-D7
-		data.writeShort(89);
+		//D6-D7气泵压力
+		data.writeShort(-89);
 		
-		//D8-D9
+		//D8-D9环境气压
 		data.writeShort(156);
 		
-		//D10-D13
+		//D10-D13(文档没有说明，用填充)
 		data.writeZero(4);
 		
-		//D14-D16
-		data.writeBytes(toBytes(-103, 3));
+		//D14-D16机器工作时间(单位：小时)
+		data.writeBytes(toBytes(103, 3));
 		
-		//D17-D19
-		data.writeBytes(toBytes(-110, 3));
+		//D17-D19气泵工作时间(单位：分钟)
+		data.writeBytes(toBytes(60, 3));
 		
 		channel.writeAndFlush(data);
-		
 	}
 	
 	public static byte [] toBytes(long data,int byteLength) {
