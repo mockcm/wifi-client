@@ -30,7 +30,8 @@ public class WifiClient {
 					.handler(new ChannelInitializer<SocketChannel>() {
 						protected void initChannel(SocketChannel ch)
 								throws Exception {
-							ch.pipeline().addLast("decoder",new LengthFieldBasedFrameDecoder(200, 0, 2, 1, 0));
+							ch.pipeline().addLast("decoder",new LengthFieldBasedFrameDecoder(200, 0, 2, 0, 0));
+							ch.pipeline().addLast(new ReceiveMessageHandler());
 						}
 					})
 					.option(ChannelOption.TCP_NODELAY, true);
@@ -67,10 +68,10 @@ public class WifiClient {
 		data.writeByte(56);
 		
 		//D6-D7气泵压力
-		data.writeShort(-89);
+		data.writeShort(89);
 		
 		//D8-D9环境气压
-		data.writeShort(156);
+		data.writeShort(67);
 		
 		//D10-D13(文档没有说明，用填充)
 		data.writeZero(4);
@@ -80,6 +81,10 @@ public class WifiClient {
 		
 		//D17-D19气泵工作时间(单位：分钟)
 		data.writeBytes(toBytes(60, 3));
+		
+		for (int i = 0;i<data.readableBytes();i++) {
+			System.out.print("0x" + Integer.toHexString(data.getByte(i)) + " ");
+		}
 		
 		channel.writeAndFlush(data);
 	}
