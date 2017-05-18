@@ -1,5 +1,7 @@
 package com.mock.wificlient;
 
+import java.nio.charset.Charset;
+
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
@@ -45,42 +47,195 @@ public class WifiClient {
 	
 	public static void main(String[] args) {
 		connect("0.0.0.0", 11306);
-		send();
+		auth();
+		sendProductInfo();
+		//sendDeviceTime();
+		//sendControl();
+		//sendAbout();
+		//sendStatInfo();
 	}
 	
-	private static void send() {
+	
+	private static void auth() {
 		
 		ByteBuf data = ByteBufAllocator.DEFAULT.buffer();
-
+		byte requestContent[] = "IAA_GZCYDQ_GZCH".getBytes();
+		byte macContent[] = "123456".getBytes();
+		data.writeShort(requestContent.length + macContent.length + 1);
+		data.writeBytes(macContent);
+		data.writeByte(0x0D);
+		data.writeBytes(requestContent);
+		channel.writeAndFlush(data);
+	}
+	
+	
+	@SuppressWarnings("unused")
+	private static void sendAbout() {
+		
+		ByteBuf data = ByteBufAllocator.DEFAULT.buffer();
+		byte macContent[] = "123456".getBytes(Charset.forName("UTF-8"));
+		byte jsonContent[] = "{'pcbVer':'1.0','serial':'SN1236954','EquipmentVer':'2.0'}".getBytes(Charset.forName("UTF-8"));
+		
+		data.writeShort(macContent.length + 1 + jsonContent.length);
+		data.writeBytes(macContent);
+		data.writeByte(0x04);
+		data.writeBytes(jsonContent);
+		channel.writeAndFlush(jsonContent);
+		channel.writeAndFlush(data);
+	}
+	
+	
+	@SuppressWarnings("unused")
+	private static void sendControl() {
+		
+		ByteBuf data = ByteBufAllocator.DEFAULT.buffer();
+		byte macContent[] = "123456".getBytes(Charset.forName("UTF-8"));
+		
+		data.writeShort(macContent.length + 68);
+		data.writeBytes(macContent);
+		
+		data.writeByte(0x03);
+		
+		data.writeByte(12);
+		
+		//第一阶段
+		data.writeByte(10);
+		data.writeByte(9);
+		data.writeByte(8);
+		data.writeByte(7);
+		data.writeByte(1);
+		data.writeByte(0);
+		data.writeShort(12);
+		data.writeShort(8);
+		
+		//第二阶段
+		data.writeByte(11);
+		data.writeByte(10);
+		data.writeByte(9);
+		data.writeByte(9);
+		data.writeByte(2);
+		data.writeByte(1);
+		data.writeShort(13);
+		data.writeShort(9);
+		
+		//第三阶段
+		data.writeByte(12);
+		data.writeByte(11);
+		data.writeByte(10);
+		data.writeByte(10);
+		data.writeByte(3);
+		data.writeByte(2);
+		data.writeShort(14);
+		data.writeShort(10);
+		
+		
+		//第四阶段
+		data.writeByte(13);
+		data.writeByte(12);
+		data.writeByte(10);
+		data.writeByte(8);
+		data.writeByte(4);
+		data.writeByte(5);
+		data.writeShort(15);
+		data.writeShort(7);
+		
+		//第五阶段
+		data.writeByte(16);
+		data.writeByte(13);
+		data.writeByte(11);
+		data.writeByte(9);
+		data.writeByte(7);
+		data.writeByte(9);
+		data.writeShort(23);
+		data.writeShort(19);
+		
+		data.writeByte(1);
+		data.writeByte(10);
+		data.writeByte(1);
+		
+		data.writeShort(100);
+		data.writeShort(89);
+		data.writeByte(56);
+		
+		data.writeShort(10);
+		data.writeShort(60);
+		data.writeShort(8);
+		data.writeShort(58);
+		
+		channel.writeAndFlush(data);
+	}
+	
+	@SuppressWarnings("unused")
+	private static void sendDeviceTime() {
+		
+		ByteBuf data = ByteBufAllocator.DEFAULT.buffer();
+		byte macContent[] = "123456".getBytes(Charset.forName("UTF-8"));
+		
+		data.writeShort(macContent.length + 8);
+		data.writeBytes(macContent);
+		data.writeByte(0x02);
+		
+		data.writeByte(16);
+		data.writeByte(17);
+		data.writeByte(5);
+		data.writeByte(18);
+		data.writeByte(22);
+		data.writeByte(30);
+		data.writeByte(30);
+		channel.writeAndFlush(data);
+	}
+	
+	private static void sendProductInfo() {
+		
+		ByteBuf data = ByteBufAllocator.DEFAULT.buffer();
+		byte macContent[] = "123456".getBytes(Charset.forName("UTF-8"));
+		byte jsonContent[] = "{'name':'wifi',addr:'中国'}".getBytes(Charset.forName("UTF-8"));
+		
+		data.writeShort(macContent.length + 1 + jsonContent.length);
+		data.writeBytes(macContent);
+		data.writeByte(0x01);
+		data.writeBytes(jsonContent);
+		channel.writeAndFlush(data);
+	}
+	
+	
+	
+	@SuppressWarnings("unused")
+	private static void sendStatInfo() {
+		
+		ByteBuf data = ByteBufAllocator.DEFAULT.buffer();
+		
+		byte macContent[] = "123456".getBytes();
+		
 		//写长度，（1控制头(D0) + 19数据  = 20）
-		data.writeShort(20);
-				
+		data.writeShort(macContent.length + 18);
+		
+		//MAC
+		data.writeBytes(macContent);
+		
 		//状态数据(控制头)
 		data.writeByte(0x06);
 		
-		//D1-D2精油余量
+		//D9-D10精油余量
 		data.writeShort(96);
 		
-		//D3-D4精油总量
+		//D11-D12精油总量
 		data.writeShort(102);
 		
-		//D5电量
+		//D13电量
 		data.writeByte(56);
 		
-		//D6-D7气泵压力
+		//D14-D15气泵压力
 		data.writeShort(89);
 		
-		//D8-D9环境气压
+		//D16-D17环境气压
 		data.writeShort(67);
+
+		//D18-D21机器工作时间(单位：小时)
+		data.writeBytes(toBytes(103, 4));
 		
-		//D10-D13(文档没有说明，用填充)
-		data.writeZero(4);
-		
-		//D14-D16机器工作时间(单位：小时)
-		data.writeBytes(toBytes(103, 3));
-		
-		//D17-D19气泵工作时间(单位：分钟)
-		data.writeBytes(toBytes(60, 3));
+		//D22-D25气泵工作时间(单位：分钟)
+		data.writeBytes(toBytes(-60, 4));
 		
 		for (int i = 0;i<data.readableBytes();i++) {
 			System.out.print("0x" + Integer.toHexString(data.getByte(i)) + " ");

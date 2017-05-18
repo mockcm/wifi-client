@@ -1,5 +1,7 @@
 package com.mock.wificlient;
 
+import java.nio.charset.Charset;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -16,11 +18,17 @@ public class ReceiveMessageHandler extends ChannelInboundHandlerAdapter {
 			throws Exception {
 		try {
 			ByteBuf data = (ByteBuf) msg;
-			logger.info("receive message:{}",data.getByte(2));
+			short length = data.readShort();
+			byte control = data.readByte();
+			if (control == 0x0D) {
+				String message = data.toString(Charset.forName("UTF-8"));
+				logger.info("auth result : {}",message);
+			}else {
+				logger.info("Get response from server. length : {},control:{},data:{}",length,control,data.readByte());
+			}
 		}finally {
 			ReferenceCountUtil.release(msg);
 		}
-		
 	}
-
 }
+
